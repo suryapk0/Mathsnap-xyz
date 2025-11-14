@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MathSnap.xyz - Free Math Solver with Photo Upload</title>
+  <meta name="description" content="फ्री मैथ सॉल्वर: फोटो अपलोड करो, स्टेप-बाय-स्टेप सॉल्यूशन पाओ। Algebra, Calculus, Hindi में।"/>
+  <meta property="og:image" content="https://mathsnap.xyz/og-image.jpg"/>
+  <link rel="canonical" href="https://mathsnap.xyz"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:sans-serif; background:#667eea; color:#fff; padding:20px; }
+    .container { max-width:500px; margin:auto; background:white; color:#333; border-radius:16px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+    h1 { color:#5a67d8; text-align:center; }
+    input, textarea, button { width:100%; padding:14px; margin:10px 0; border-radius:10px; border:2px solid #e2e8f0; font-size:16px; }
+    button { background:#48bb78; color:white; font-weight:bold; border:none; cursor:pointer; }
+    #result { margin-top:20px; display:none; }
+    .step { background:#f0fff4; padding:12px; margin:8px 0; border-radius:8px; border-left:5px solid #48bb78; }
+    .header-ad, .footer-ad { position:fixed; width:100%; background:white; padding:10px; text-align:center; z-index:1000; }
+    .header-ad { top:0; }
+    .footer-ad { bottom:0; }
+  </style>
+</head>
+<body>
+
+  <!-- Adsterra Header -->
+  <div class="header-ad">
+    <script type="text/javascript">
+      atOptions = {'key':'YOUR_HEADER_KEY','format':'iframe','height':90,'width':728,'params':{}};
+      document.write('<scr'+'ipt type="text/javascript" src="http'+(location.protocol==='https:'?'s':'')+'://www.adsterra.com/YOUR_KEY.js"></scr'+'ipt>');
+    </script>
+  </div>
+
+  <div class="container">
+    <h1>MathSnap.xyz</h1>
+    <p style="text-align:center;">फोटो से मैथ सॉल्व करो – हिंदी में!</p>
+    <p id="limitInfo" style="text-align:center; font-weight:bold; color:#e74c3c;"></p>
+
+    <input type="file" id="photo" accept="image/*" />
+    <textarea id="textInput" placeholder="या यहाँ लिखो: integrate x^2 dx"></textarea>
+    <button onclick="solveMath()">सॉल्व करो</button>
+
+    <div id="result">
+      <div id="steps"></div>
+      <div style="text-align:center; font-size:20px; margin:15px 0;">उत्तर: <span id="answer"></span></div>
+      <button style="background:#4299e1;" onclick="playVoice()">वॉइस में सुनो</button>
+    </div>
+
+    <p style="text-align:center; margin-top:30px; font-size:12px;">
+      <a href="/about">About</a> | <a href="/privacy-policy">Privacy</a> | <a href="/terms">Terms</a>
+    </p>
+  </div>
+
+  <!-- Adsterra Footer -->
+  <div class="footer-ad">
+    <script type="text/javascript">
+      atOptions = {'key':'YOUR_FOOTER_KEY','format':'iframe','height':90,'width':728,'params':{}};
+      document.write('<scr'+'ipt type="text/javascript" src="http'+(location.protocol==='https:'?'s':'')+'://www.adsterra.com/YOUR_KEY.js"></scr'+'ipt>');
+    </script>
+  </div>
+
+  <script>
+    const BACKEND_URL = "/solve";
+    let freePhotos = localStorage.getItem('freePhotos') ? parseInt(localStorage.getItem('freePhotos')) : 2;
+    document.getElementById('limitInfo').innerText = `आपके पास ${freePhotos} फ्री फोटो बाकी हैं।`;
+
+    function solveMath() {
+      const photo = document.getElementById('photo').files[0];
+      const text = document.getElementById('textInput').value.trim();
+      if (!photo && !text) return alert("फोटो या टेक्स्ट डालो!");
+
+      if (photo && freePhotos <= 0) {
+        if (localStorage.getItem('adWatched') === 'true') {
+          localStorage.removeItem('adWatched');
+        } else {
+          window.location.href = "/ad-countdown.html";
+          return;
+        }
+      }
+
+      const form = new FormData();
+      if (photo) form.append('image', photo);
+      if (text) form.append('text', text);
+
+      fetch(BACKEND_URL, {method:'POST', body:form})
+        .then(r => r.json())
+        .then(d => {
+          document.getElementById('result').style.display = 'block';
+          document.getElementById('answer').innerText = d.answer;
+          const stepsDiv = document.getElementById('steps'); stepsDiv.innerHTML = '';
+          d.steps.forEach(s => { const div = document.createElement('div'); div.className='step'; div.innerText=s; stepsDiv.appendChild(div); });
+          window.voiceText = d.voice;
+
+          if (photo && freePhotos > 0) {
+            freePhotos--;
+            localStorage.setItem('freePhotos', freePhotos);
+            document.getElementById('limitInfo').innerText = `आपके पास ${freePhotos} फ्री फोटो बाकी हैं।`;
+          }
+        });
+    }
+
+    function playVoice() {
+      if (window.voiceText && 'speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(window.voiceText);
+        utter.lang = 'hi-IN'; speechSynthesis.speak(utter);
+      }
+    }
+  </script>
+</body>
+</html>
