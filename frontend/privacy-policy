@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy - MathSnap.xyz</title>
+  <meta name="description" content="MathSnap.xyz की प्राइवेसी पॉलिसी।"/>
+  <link rel="canonical" href="https://mathsnap.xyz/privacy-policy"/>
+  <style>
+    body {font-family: sans-serif; background:#f8f9fa; color:#333; padding:20px; line-height:1.7;}
+    .container {max-width:800px; margin:auto; background:white; padding:30px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.1);}
+    h1,h2 {color:#5a67d8;}
+    a {color:#48bb78;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Privacy Policy</h1>
+  <p>अंतिम अपडेट: 14 नवंबर 2025</p>
+  <p>MathSnap.xyz पर हम <strong>कोई पर्सनल डेटा नहीं मांगते</strong>।</p>
+  <h2>क्या कलेक्ट करते हैं?</h2>
+  <ul>
+    <li>अपलोड की गई फोटो → सिर्फ Mathpix API को भेजी जाती है → तुरंत डिलीट</li>
+    <li>टेक्स्ट इनपुट → सेशन खत्म होते ही डिलीट</li>
+    <li>Google Analytics से विज़िट डेटा (कोई नाम/ईमेल नहीं)</li>
+  </ul>
+  <h2>विज्ञापन</h2>
+  <p>हम Adsterra से विज्ञापन दिखाते हैं। उनकी प्राइवेसी पॉलिसी अलग है।</p>
+  <h2>संपर्क</h2>
+  <p>Email: <a href="mailto:hello@mathsnap.xyz">hello@mathsnap.xyz</a></p>
+  <p style="text-align:center; margin-top:40px;"><a href="/">← होमपेज</a></p>
+</div>
+</body>
+</html>
