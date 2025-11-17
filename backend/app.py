@@ -1,22 +1,20 @@
 from flask import Flask, request, jsonify
 from sympy import sympify, solve, diff, integrate, latex
-import json, requests
+import pytesseract
+from PIL import Image
+import io
 
 app = Flask(__name__)
 
-# Mathpix API (फ्री: mathpix.com → Dashboard से ID/Key लो)
-MATHPIX_ID = "YOUR_MATHPIX_APP_ID"
-MATHPIX_KEY = "YOUR_MATHPIX_APP_KEY"
-
 def ocr_image(file_stream):
     try:
-        r = requests.post("https://api.mathpix.com/v3/text",
-            files={"file": file_stream},
-            data={"options_json": json.dumps({"math_inline_delimiters": ["$", "$"]})},
-            headers={"app_id": MATHPIX_ID, "app_key": MATHPIX_KEY})
-        return r.json().get("text", "")
+        image = Image.open(io.BytesIO(file_stream.read()))
+        # Math/handwriting के लिए config
+        config = '--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789+-*/=()x[]{}.,^_ '
+        text = pytesseract.image_to_string(image, config=config)
+        return text.strip() or "x + 1"
     except:
-        return "x + 1"
+        return "x + 1"  # Fallback
 
 def get_solution_steps(expr_str):
     try:
@@ -24,27 +22,31 @@ def get_solution_steps(expr_str):
         steps = []
         result = None
         if 'integrate' in expr_str.lower():
-            steps.append(f"∫ {expr_str}")
+            steps.append(f"चरण 1: ∫ {expr_str}")
             result = integrate(expr)
-            steps.append(f"हल → {latex(result)}")
+            steps.append(f"चरण 2: {latex(result)}")
         elif 'diff' in expr_str.lower():
-            steps.append(f"फंक्शन → {latex(expr)}")
+            steps.append(f"चरण 1: {latex(expr)}")
             result = diff(expr)
-            steps.append(f"अवकलन → {latex(result)}")
+            steps.append(f"चरण 2: {latex(result)}")
         else:
-            steps.append(f"समीकरण → {latex(expr)}")
+            steps.append(f"चरण 1: {latex(expr)}")
             result = solve(expr)
-            steps.append(f"हल → {latex(result)}")
-        voice = " | ".join(steps) + f" | अंतिम उत्तर: {str(result)}"
+            steps.append(f"चरण 2: {latex(result)}")
+        voice = " | ".join(steps) + f" | उत्तर: {str(result)}"
         return steps, str(result), voice
     except:
-        return ["समझ नहीं आया!"], "Error", "गलत इनपुट।"
+        return ["गलत फॉर्मूला!"], "Error", "समझ नहीं आया।"
 
 @app.route('/solve', methods=['POST'])
 def solve():
     text = request.form.get('text', '')
     image = request.files.get('image')
-    latex_text = ocr_image(image) if image else text
+    if image:
+        image.seek(0)
+        latex_text = ocr_image(image)
+    else:
+        latex_text = text
     steps, answer, voice = get_solution_steps(latex_text)
     return jsonify({'steps': steps, 'answer': answer, 'voice': voice})
 
