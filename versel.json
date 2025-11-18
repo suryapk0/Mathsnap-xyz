@@ -3,32 +3,26 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "20mb" }
     },
     {
-      "src": "frontend/**",
+      "src": "*.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "api/index.py"
+      "src": "/api/solve",
+      "dest": "/api/index.py"
     },
     {
-      "src": "/solve",
-      "dest": "/api/solve"
+      "src": "/(.*)\\.html",
+      "dest": "/$1.html"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
-    },
-    {
-      "src": "/frontend/(.*)",
-      "headers": {
-        "cache-control": "s-maxage=0"
-      },
-      "dest": "/frontend/$1"
+      "dest": "/index.html"
     }
   ]
 }
