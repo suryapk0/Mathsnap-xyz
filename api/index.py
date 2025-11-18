@@ -1,11 +1,11 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from sympy import sympify, solve, diff, integrate, latex
 import pytesseract
 from PIL import Image
 import io
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 
 def ocr_image(file_stream):
     try:
@@ -38,11 +38,27 @@ def get_solution_steps(expr_str):
     except:
         return ["गलत फॉर्मूला!"], "Error", "समझ नहीं आया।"
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 def home():
-    return "MathSnap.xyz - Flask App Running!"  # टेस्ट के लिए
+    return send_from_directory('.', 'index.html')
 
-@app.route('/solve', methods=['POST'])
+@app.route('/ad-countdown.html')
+def ad_countdown():
+    return send_from_directory('.', 'ad-countdown.html')
+
+@app.route('/about.html')
+def about():
+    return send_from_directory('.', 'about.html')
+
+@app.route('/privacy-policy.html')
+def privacy():
+    return send_from_directory('.', 'privacy-policy.html')
+
+@app.route('/terms.html')
+def terms():
+    return send_from_directory('.', 'terms.html')
+
+@app.route('/api/solve', methods=['POST'])
 def solve():
     text = request.form.get('text', '')
     image = request.files.get('image')
@@ -55,4 +71,5 @@ def solve():
     return jsonify({'steps': steps, 'answer': answer, 'voice': voice})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
