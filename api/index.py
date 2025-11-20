@@ -69,7 +69,3 @@ def solve():
         latex_text = text
     steps, answer, voice = get_solution_steps(latex_text)
     return jsonify({'steps': steps, 'answer': answer, 'voice': voice})
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
