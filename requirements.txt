@@ -2,3 +2,4 @@ flask==2.3.3
 sympy==1.12
 pytesseract==0.3.10
 pillow==10.1.0
+flask-cors
