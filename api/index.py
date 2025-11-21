@@ -1,11 +1,13 @@
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # ← ये लाइन नई है
 from sympy import sympify, solve, diff, integrate, latex
 import pytesseract
 from PIL import Image
 import io
 
 app = Flask(__name__)
+CORS(app)  # ← ये लाइन CORS error को 100% खत्म कर देगी
 
 def ocr_image(file_stream):
     try:
@@ -13,33 +15,31 @@ def ocr_image(file_stream):
         config = '--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789+-*/=()x[]{}.,^_ '
         text = pytesseract.image_to_string(image, config=config)
         return text.strip() or "x + 1"
-    except:
+    except Exception as e:
         return "x + 1"
 
 def get_solution_steps(expr_str):
     try:
         expr = sympify(expr_str.replace('^', '**'))
         steps = []
-        result = None
         if 'integrate' in expr_str.lower():
-            steps.append(f"चरण 1: ∫ {expr_str}")
             result = integrate(expr)
-            steps.append(f"चरण 2: {latex(result)}")
+            steps = [f"∫ {expr_str}", f"{latex(result)}"]
         elif 'diff' in expr_str.lower():
-            steps.append(f"चरण 1: {latex(expr)}")
             result = diff(expr)
-            steps.append(f"चरण 2: {latex(result)}")
+            steps = [f"Derivative of {latex(expr)}", f"{latex(result)}"]
         else:
-            steps.append(f"चरण 1: {latex(expr)}")
             result = solve(expr)
-            steps.append(f"चरण 2: {latex(result)}")
-        voice = " | ".join(steps) + f" | उत्तर: {str(result)}"
+            steps = [f"Equation: {latex(expr)}", f"Solution: {latex(result)}"]
+        voice = " | ".join(steps) + f" | Final answer {str(result)}"
         return steps, str(result), voice
     except:
-        return ["गलत फॉर्मूला!"], "Error", "समझ नहीं आया।"
+        return ["समझ नहीं आया"], "Error", "गलत सवाल"
 
-@app.route('/api/solve', methods=['POST'])  # ← ये लाइन सबसे महत्वपूर्ण है!
+@app.route('/api/solve', methods=['POST', 'OPTIONS'])  # OPTIONS भी जरूरी
 def solve():
+    if request.method == 'OPTIONS':
+        return '', 200
     text = request.form.get('text', '')
     image = request.files.get('image')
     if image:
